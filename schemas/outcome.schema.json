@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://defectloop.invalid/schemas/outcome.schema.json",
+  "title": "defectloop round outcome",
+  "description": "Written by the agent at the end of a round, at the path given in the prompt. The supervisor normalises it: unknown fields are dropped, invalid enums are repaired, strings are truncated to maxLength.",
+  "type": "object",
+  "properties": {
+    "summary": { "type": "string", "maxLength": 1200, "description": "What the round did, in a few sentences." },
+    "findings": {
+      "type": "array",
+      "maxItems": 40,
+      "items": { "$ref": "#/$defs/finding" }
+    },
+    "followUps": {
+      "type": "array",
+      "maxItems": 3,
+      "description": "Campaigns worth running in a later round (for example variants of a defect just found).",
+      "items": {
+        "type": "object",
+        "required": ["technique", "brief"],
+        "properties": {
+          "technique": { "type": "string", "maxLength": 40, "description": "Id of a technique in the catalog." },
+          "area": { "type": "string", "maxLength": 120 },
+          "brief": { "type": "string", "maxLength": 400 }
+        }
+      }
+    },
+    "proposedTechnique": {
+      "type": "object",
+      "description": "A new technique. Recorded for review; added to the catalog only when loop.acceptProposedTechniques is true.",
+      "required": ["name", "instructions"],
+      "properties": {
+        "name": { "type": "string", "maxLength": 80 },
+        "instructions": { "type": "string", "maxLength": 2000 },
+        "requires": { "type": "array", "items": { "type": "string" } },
+        "perArea": { "oneOf": [{ "const": false }, { "type": "string" }] }
+      }
+    }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "required": ["title"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "status": {
+          "enum": ["fixed", "proposed", "dismissed", "unverified"],
+          "description": "fixed: corrected in a local commit with a test. proposed: needs a human decision. dismissed: suspected, then disproved (with evidence). unverified: could not be confirmed either way. Invalid values become unverified."
+        },
+        "severity": { "enum": ["critical", "high", "medium", "low"], "description": "Invalid values become medium." },
+        "category": { "enum": ["bug", "security", "performance", "consistency", "test", "data", "ux", "docs", "other"], "description": "Invalid values become other." },
+        "location": { "type": "string", "maxLength": 200, "description": "path[:line]" },
+        "evidence": { "type": "string", "maxLength": 600, "description": "How it was proven: a failing test, a command and its output, a trace." },
+        "commit": { "type": "string", "maxLength": 40, "description": "Short sha of the fixing commit, when status is fixed." }
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "name": "defectloop",
+  "version": "0.1.0-SNAPSHOT",
+  "description": "Run a coding agent unattended, one fresh session per round, choosing an audit technique each round with a bandit-style scheduler, under a deterministic tool guard and a mandatory spend cap.",
+  "license": "Apache-2.0",
+  "author": "Giuseppe Picciocchi",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "defectloop": "bin/defectloop.mjs"
+  },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./scheduler": "./src/scheduler.mjs",
+    "./guard": "./src/guard/rules.mjs",
+    "./stream": "./src/stream.mjs"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "schemas/",
+    "templates/",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\"",
+    "scrub-check": "bash scripts/scrub-check.sh"
+  },
+  "keywords": [
+    "audit",
+    "coding-agent",
+    "headless",
+    "bandit",
+    "ucb",
+    "pretooluse",
+    "hook",
+    "guard"
+  ]
+}

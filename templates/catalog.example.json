@@ -1,0 +1,76 @@
+{
+  "$schema": "./node_modules/defectloop/schemas/catalog.schema.json",
+  "version": 1,
+  "techniques": [
+    {
+      "id": "cleanup",
+      "name": "Clean up an interrupted round",
+      "internal": true,
+      "instructions": "A previous round stopped and left uncommitted changes, listed in the context. Read the diff and the previous round's transcript in the state directory. If the change is complete and sound, run the project's checks and commit it with a pathspec. If it is half done but the direction is clear, finish it. Otherwise set it aside with `git stash push -m defectloop-leftovers -- <files>` and record what it was. Never touch the foreign files."
+    },
+    {
+      "id": "deep-review",
+      "name": "Deep review of one area",
+      "perArea": "code",
+      "instructions": "Read the area named in the campaign end to end, as a reviewer who has to sign off on it: control flow, error handling, boundary conditions, state that can be left half updated, assumptions the callers do not honour. For each suspicion, prove it with a failing test or a reproducible command before calling it a defect. Fix contained defects with a test; propose the rest."
+    },
+    {
+      "id": "test-gaps",
+      "name": "Behaviour no test pins down",
+      "perArea": "code",
+      "instructions": "List the observable behaviours of the area (public functions, endpoints, commands) and look for the ones no test would notice breaking: error branches, empty and maximal inputs, ordering, idempotency. Write the missing tests. A new test that fails is a defect: fix it if contained, otherwise mark the test as expected-to-fail with a comment and propose the fix."
+    },
+    {
+      "id": "recent-changes",
+      "name": "Review of recent commits",
+      "instructions": "Review the commits since the reference commit given in the context (or the last 20 if there is none), including the commits made by this loop. Look for regressions, missing tests for the changed lines, inconsistencies between what the message says and what the diff does, and follow-up work the change implies but did not do."
+    },
+    {
+      "id": "static-analysis",
+      "name": "Static analysis beyond the usual gate",
+      "instructions": "Run the linters, type checkers and analyzers the project already has, with stricter settings than its usual gate when they exist locally (do not install new tools). Triage the output: most warnings are noise; keep only those that point at a real defect, prove each one, and fix the contained ones."
+    },
+    {
+      "id": "error-paths",
+      "name": "Failure handling",
+      "perArea": "code",
+      "instructions": "Follow what happens in the area when things fail: timeouts, exceptions from dependencies, partial writes, retries that repeat side effects, resources not released, errors swallowed or logged without context. Use tests with fakes or local stand-ins to provoke each failure."
+    },
+    {
+      "id": "input-boundaries",
+      "name": "Extreme and hostile inputs",
+      "perArea": "code",
+      "instructions": "Feed the area's entry points the inputs nobody tries: empty, huge, deeply nested, unicode and right-to-left text, negative and overflowing numbers, duplicated keys, unexpected types, path traversal, injection payloads where strings reach a shell, a query or a template. Prove each defect with a test."
+    },
+    {
+      "id": "docs-consistency",
+      "name": "Docs, help texts and code agree",
+      "instructions": "Compare what the README, the docs, the command help and the error messages promise with what the code does: options that no longer exist, defaults that changed, examples that fail when run. Fix the side that is wrong (usually the docs) when the intent is clear; propose otherwise."
+    },
+    {
+      "id": "dependency-review",
+      "name": "Dependency review (offline)",
+      "maxPerDay": 1,
+      "instructions": "Read the manifests and lockfiles without touching the network: duplicated major versions, unpinned ranges where reproducibility matters, packages used only in tests but declared for production, dependencies imported but not declared, licences incompatible with the project's. Propose changes; do not upgrade packages."
+    },
+    {
+      "id": "mutation-probe",
+      "name": "Mutation probe of the tests",
+      "perArea": "code",
+      "maxPerDay": 2,
+      "instructions": "Pick a few important lines in the area and mutate them by hand (flip a condition, drop a call, change a boundary), one at a time, running the related tests after each. A mutation that no test catches shows a missing test: write it, and restore the original code. Never commit a mutation."
+    },
+    {
+      "id": "security-review",
+      "name": "Security review of one area",
+      "perArea": "code",
+      "instructions": "Look at the area as an attacker: authorization checks that can be skipped, data of one user reachable by another, secrets in logs or errors, unsafe deserialization, command or query construction from input, missing limits that allow exhaustion. Prove issues with local tests only; never probe external systems."
+    },
+    {
+      "id": "performance",
+      "name": "Waste and accidental complexity",
+      "perArea": "code",
+      "instructions": "Look for work done more often than needed: repeated queries in loops, quadratic algorithms on inputs that grow, synchronous I/O on hot paths, caches that never hit, large objects copied for nothing. Measure before and after with a local benchmark or a test; fix only what the measurement confirms."
+    }
+  ]
+}

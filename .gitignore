@@ -1,0 +1,4 @@
+node_modules/
+.defectloop/
+*.log
+.DS_Store

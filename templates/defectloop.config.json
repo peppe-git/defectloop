@@ -1,0 +1,32 @@
+{
+  "$schema": "./node_modules/defectloop/schemas/config.schema.json",
+  "catalog": "defectloop.catalog.json",
+  "agent": {
+    "adapter": "claude-cli",
+    "command": "claude",
+    "auth": "api-key",
+    "model": null,
+    "permissionMode": "dontAsk",
+    "allowedTools": ["Read", "Glob", "Grep", "Edit", "Write", "Bash"]
+  },
+  "budget": {
+    "perRoundUsd": 2,
+    "dailyUsd": 10,
+    "monthlyUsd": 100
+  },
+  "loop": {
+    "maxRoundMinutes": 60,
+    "maxSilenceMinutes": 20,
+    "secondsBetweenRounds": 20,
+    "maxConsecutiveFailures": 3
+  },
+  "areas": {
+    "discover": [{ "dir": "src", "kind": "code" }],
+    "priority": []
+  },
+  "capabilities": {},
+  "guard": {
+    "network": { "allowHosts": [] },
+    "protectedPaths": []
+  }
+}

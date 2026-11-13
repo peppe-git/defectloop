@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://defectloop.invalid/schemas/round-record.schema.json",
+  "title": "defectloop round record",
+  "description": "One line of .defectloop/rounds.jsonl, written by the supervisor after every round (never by the agent).",
+  "type": "object",
+  "required": ["schemaVersion", "round", "technique", "status", "startedAt", "minutes", "costUsd", "costSource", "next"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "round": { "type": "string", "pattern": "^round-[0-9]{4,}$" },
+    "technique": { "type": "string" },
+    "techniqueName": { "type": "string" },
+    "area": { "type": ["string", "null"] },
+    "reason": { "type": "string", "description": "Why the scheduler chose this campaign." },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "minutes": { "type": "number" },
+    "status": {
+      "enum": ["completed", "stopped", "timeout", "stalled", "format-unrecognized", "auth-policy", "auth-error", "rate-limited", "overloaded", "round-budget-exhausted", "no-outcome", "crashed"],
+      "description": "How the round ended (src/limits.mjs classifyRoundEnd)."
+    },
+    "detail": { "type": "string" },
+    "next": { "enum": ["continue", "wait", "halt", "stop"] },
+    "waitUntil": { "type": ["string", "null"], "format": "date-time" },
+    "counts": {
+      "type": "object",
+      "properties": { "fixed": { "type": "integer" }, "proposed": { "type": "integer" }, "dismissed": { "type": "integer" }, "unverified": { "type": "integer" } }
+    },
+    "commits": { "type": "array", "items": { "type": "string" }, "description": "\"sha subject\" of the commits carrying the round's trailer." },
+    "otherCommits": { "type": "integer", "description": "Commits made during the round without the trailer (someone else, or a forgotten trailer)." },
+    "costUsd": { "type": "number", "minimum": 0 },
+    "costSource": { "enum": ["reported", "estimated-cap"], "description": "reported: total_cost_usd from the agent (a client-side estimate). estimated-cap: no cost reported, the per-round cap was charged." },
+    "authSource": { "type": ["string", "null"], "description": "apiKeySource from the agent's init event." },
+    "model": { "type": ["string", "null"] },
+    "agentVersion": { "type": ["string", "null"] },
+    "numTurns": { "type": ["integer", "null"] },
+    "summary": { "type": "string" },
+    "proposedTechnique": { "type": ["object", "null"] },
+    "error": { "type": ["string", "null"] }
+  }
+}

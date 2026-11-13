@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://defectloop.invalid/schemas/catalog.schema.json",
+  "title": "defectloop technique catalog",
+  "type": "object",
+  "required": ["version", "techniques"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "const": 1 },
+    "techniques": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "instructions"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,39}$" },
+          "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "instructions": { "type": "string", "minLength": 20, "description": "What a round running this technique must do. Copied into the round context." },
+          "requires": { "type": "array", "items": { "type": "string" }, "description": "Capabilities (config.capabilities) that must be available." },
+          "perArea": { "oneOf": [{ "const": false }, { "type": "string" }], "description": "false, \"all\", or an area kind: the round gets the least covered area of that kind." },
+          "maxPerDay": { "type": "integer", "minimum": 1 },
+          "internal": { "type": "boolean", "description": "Never chosen by the scheduler; used by the supervisor (cleanup)." },
+          "origin": { "type": "string", "description": "Set on techniques adopted from a round's proposal." }
+        }
+      }
+    }
+  }
+}

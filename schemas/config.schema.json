@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://defectloop.invalid/schemas/config.schema.json",
+  "title": "defectloop configuration",
+  "description": "defectloop.config.json. Relative paths are resolved against `root`, which defaults to the directory of this file. Unknown keys are errors. See docs/configuration.md.",
+  "type": "object",
+  "required": ["budget"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "root": { "type": "string", "default": "." },
+    "stateDir": { "type": "string", "default": ".defectloop" },
+    "catalog": { "type": "string", "default": "defectloop.catalog.json" },
+    "prompt": { "type": ["string", "null"], "default": null, "description": "Prompt template; null uses the built-in templates/PROMPT.md." },
+    "agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "adapter": { "enum": ["claude-cli", "agent-sdk"], "default": "claude-cli" },
+        "command": { "oneOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" }, "minItems": 1 }], "default": "claude" },
+        "auth": { "enum": ["api-key", "bedrock", "vertex", "foundry"], "default": "api-key", "description": "There is no subscription mode: see docs/costs.md." },
+        "verifyAuthSource": { "type": "boolean", "default": true },
+        "model": { "type": ["string", "null"], "default": null },
+        "fallbackModel": { "type": ["string", "null"], "default": null },
+        "effort": { "type": ["string", "null"], "default": null },
+        "permissionMode": { "enum": ["dontAsk", "acceptEdits", "default", "manual", "auto"], "default": "dontAsk" },
+        "allowedTools": { "type": "array", "items": { "type": "string" } },
+        "disallowedTools": { "type": "array", "items": { "type": "string" } },
+        "settingSources": { "oneOf": [{ "type": "null" }, { "type": "array", "minItems": 1, "items": { "enum": ["user", "project", "local"] } }], "default": ["project"] },
+        "mcpConfig": { "type": ["string", "null"], "default": null },
+        "maxTurns": { "type": ["integer", "null"], "minimum": 1, "default": null },
+        "extraArgs": { "type": "array", "items": { "type": "string" }, "default": [] }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["perRoundUsd"],
+      "anyOf": [{ "required": ["dailyUsd"] }, { "required": ["monthlyUsd"] }],
+      "properties": {
+        "perRoundUsd": { "type": "number", "exclusiveMinimum": 0, "description": "Passed to the agent as --max-budget-usd; also charged for rounds that report no cost." },
+        "dailyUsd": { "type": "number", "exclusiveMinimum": 0 },
+        "monthlyUsd": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "loop": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "maxRoundMinutes": { "type": "number", "exclusiveMinimum": 0, "default": 60 },
+        "maxSilenceMinutes": { "type": "number", "exclusiveMinimum": 0, "default": 20 },
+        "secondsBetweenRounds": { "type": "number", "minimum": 0, "default": 20 },
+        "maxConsecutiveFailures": { "type": "integer", "minimum": 1, "default": 3 },
+        "maxWaitHours": { "type": "number", "exclusiveMinimum": 0, "default": 24 },
+        "keepRounds": { "type": "integer", "minimum": 1, "default": 300 },
+        "acceptProposedTechniques": { "type": "boolean", "default": false },
+        "onBudgetExhausted": { "enum": ["wait", "halt"], "default": "wait" },
+        "watchdogMs": { "type": "number", "exclusiveMinimum": 0, "default": 2000 }
+      }
+    },
+    "scoring": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "explorationWeight": { "type": "number", "minimum": 0, "default": 0.5 },
+        "waitWeight": { "type": "number", "minimum": 0, "default": 0.3 },
+        "dismissedPenalty": { "type": "number", "minimum": 0, "default": 0.15 },
+        "queueEvery": { "type": "integer", "minimum": 1, "default": 3 }
+      }
+    },
+    "areas": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "discover": { "type": "array", "items": { "type": "object", "required": ["dir", "kind"], "properties": { "dir": { "type": "string" }, "kind": { "type": "string" } } } },
+        "list": { "type": "array", "items": { "type": "object", "required": ["key", "kind"], "properties": { "key": { "type": "string" }, "name": { "type": "string" }, "kind": { "type": "string" } } } },
+        "priority": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "description": "name → probe command (argv). Exit 0 means the capability is available for this round.",
+      "additionalProperties": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+    },
+    "guard": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Lists extend the built-in defaults; they never replace them. See docs/security.md.",
+      "properties": {
+        "publish": { "type": "boolean", "default": true },
+        "destructive": { "type": "boolean", "default": true },
+        "network": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "allowHosts": { "type": "array", "items": { "type": "string" }, "description": "Exact hosts or *.suffix; localhost, 127.0.0.1 and ::1 are always included." },
+            "allowPackageInstall": { "type": "boolean", "default": false },
+            "allowGitFetch": { "type": "boolean", "default": false },
+            "allowWebSearch": { "type": "boolean", "default": false },
+            "readOnlySsh": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "secrets": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": { "allowRead": { "type": "boolean", "default": false }, "paths": { "type": "array", "items": { "type": "string" } } }
+        },
+        "protectedPaths": { "type": "array", "items": { "type": "string" } },
+        "removableDirs": { "type": "array", "items": { "type": "string" } },
+        "writableOutsideRepo": { "type": "array", "items": { "type": "string" } },
+        "deniedCommands": { "type": "array", "items": { "type": "string" } },
+        "allowCommands": { "type": "array", "items": { "type": "string" } },
+        "tools": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "deny": { "type": "array", "items": { "type": "string" } },
+            "allow": { "type": "array", "items": { "type": "string" } },
+            "mcpAllow": { "type": "array", "items": { "type": "string" } },
+            "skillDeny": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "sharedWorkingTree": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": { "enabled": { "type": "boolean", "default": true }, "windowSeconds": { "type": "number", "default": 120 }, "ignore": { "type": "array", "items": { "type": "string" } } }
+        }
+      }
+    },
+    "alerts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": { "command": { "type": ["array", "null"], "items": { "type": "string" }, "description": "Run on every alert with a JSON object on stdin ({title, text, key, stateDir})." } }
+    }
+  }
+}
