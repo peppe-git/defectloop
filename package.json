@@ -4,7 +4,14 @@
   "description": "Run a coding agent unattended, one fresh session per round, choosing an audit technique each round with a bandit-style scheduler, under a deterministic tool guard and a mandatory spend cap.",
   "license": "Apache-2.0",
   "author": "Giuseppe Picciocchi",
-  "private": true,
+  "homepage": "https://github.com/peppe-git/defectloop#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peppe-git/defectloop.git"
+  },
+  "bugs": {
+    "url": "https://github.com/peppe-git/defectloop/issues"
+  },
   "type": "module",
   "engines": {
     "node": ">=22"
