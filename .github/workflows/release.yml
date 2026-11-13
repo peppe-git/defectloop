@@ -1,0 +1,60 @@
+# SPDX-License-Identifier: Apache-2.0
+# Publishes the package to npm with trusted publishing (OIDC): no long-lived npm token. Setup, the
+# first release and the NPM_TOKEN fallback are described in RELEASING.md.
+# Written but never run yet: the repository has no remote. Actions are pinned by commit SHA.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  # Manual re-run: choose the tag (not a branch) in "Use workflow from".
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    # Optional deployment protection (required reviewers, tags only). If you set it on npmjs.com,
+    # the trusted publisher's "Environment name" must be this same name.
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write # OIDC token for npm trusted publishing and the provenance statement
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false # never use caching in release builds
+      - name: check that the tag matches a stable package.json version
+        run: node scripts/check-release-version.mjs
+      - name: check that npm supports trusted publishing (11.5.1 or later)
+        run: |
+          node -e '
+            const v = process.argv[1].trim().split(".").map(Number);
+            const ok = v[0] > 11 || (v[0] === 11 && (v[1] > 5 || (v[1] === 5 && v[2] >= 1)));
+            console.log("npm " + v.join("."));
+            if (!ok) { console.error("npm 11.5.1 or later is required for trusted publishing"); process.exit(1); }
+          ' "$(npm --version)"
+      - name: git identity for the end-to-end tests
+        run: |
+          git config --global user.name "ci"
+          git config --global user.email "ci@example.com"
+          git config --global init.defaultBranch main
+      - run: npm test
+      - run: bash scripts/scrub-check.sh
+      - name: publish
+        run: npm publish --provenance --access public
+        env:
+          # Fallback for the first release only (RELEASING.md). npm tries OIDC first; once the
+          # trusted publisher works, delete the NPM_TOKEN secret and revoke the token.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

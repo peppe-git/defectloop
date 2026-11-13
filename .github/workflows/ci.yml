@@ -10,8 +10,11 @@ on:
 permissions:
   contents: read
 
+# Check names for branch protection: "test (ubuntu-latest, node 22)", "test (ubuntu-latest, node 24)",
+# "test (macos-latest, node 22)", "test (macos-latest, node 24)" and "scrub-check".
 jobs:
   test:
+    name: test (${{ matrix.os }}, node ${{ matrix.node }})
     strategy:
       fail-fast: false
       matrix:
@@ -31,4 +34,13 @@ jobs:
           git config --global user.email "ci@example.com"
           git config --global init.defaultBranch main
       - run: npm test
+
+  scrub-check:
+    name: scrub-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Generic rules only: the project-specific patterns are private (see CONTRIBUTING.md).
       - run: bash scripts/scrub-check.sh
