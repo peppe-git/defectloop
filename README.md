@@ -1,6 +1,6 @@
 # defectloop
 
-> Status: **0.1.0-SNAPSHOT**, not published. The name is provisional.
+> Status: **0.1.0-SNAPSHOT**, not yet published on npm.
 
 defectloop runs a coding agent **unattended**, one fresh session per **round**, and decides before
 every round **which audit technique** to apply and where. Rounds hunt for real defects, fix the

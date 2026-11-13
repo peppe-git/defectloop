@@ -14,8 +14,9 @@ the tool guard (`src/guard/`), the handling of credentials passed to the agent
 
 Please report privately, **not** in a public issue:
 
-- use GitHub's **private vulnerability reporting** on this repository ("Security" tab → "Report a
-  vulnerability"), once the repository is public;
+- use GitHub's **private vulnerability reporting**:
+  <https://github.com/peppe-git/defectloop/security/advisories/new> (or the repository's "Security"
+  tab → "Report a vulnerability");
 - include the defectloop version, the agent and its version, the configuration (without secrets),
   and the smallest command or payload that reproduces the problem.
 

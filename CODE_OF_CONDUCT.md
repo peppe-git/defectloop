@@ -6,8 +6,8 @@ remove contributions and ban participants who do not follow it.
 
 ## Reporting
 
-Report unacceptable behaviour privately to the maintainers. The reporting channel will be published
-here before the repository becomes public. Reports are handled confidentially.
+Report unacceptable behaviour privately to the maintainer, using the contact options on the
+maintainer's GitHub profile: <https://github.com/peppe-git>. Reports are handled confidentially.
 
 ## Enforcement
 
