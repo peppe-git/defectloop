@@ -51,6 +51,10 @@ suite.**
 - English everywhere in the repository. Commit messages: `type(scope): sentence`
   (`feat`, `fix`, `docs`, `test`, `refactor`, `chore`).
 
+## Releases
+
+Only the release workflow publishes to npm: see [RELEASING.md](RELEASING.md).
+
 ## Security issues
 
 Not in public issues: see [SECURITY.md](SECURITY.md).
