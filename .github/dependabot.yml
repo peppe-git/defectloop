@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+# GitHub Actions only: the package has no dependencies, runtime or development, so there is nothing
+# for the npm ecosystem to update. Add an npm entry if that changes. Dependabot keeps the SHA pins and
+# updates the version comments next to them.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: chore
+      include: scope
